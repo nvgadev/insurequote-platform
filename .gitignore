@@ -1,0 +1,30 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Variable files can hold emails or account details; commit only *.example
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Keep .terraform.lock.hcl committed so provider versions are pinned.
+
+# Local tooling
+.DS_Store
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+node_modules/

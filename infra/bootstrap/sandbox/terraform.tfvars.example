@@ -1,0 +1,9 @@
+# Defaults already match the InsureQuote sandbox. Copy to terraform.tfvars only if
+# something differs (terraform.tfvars is git-ignored).
+# region            = "us-east-1"
+# aws_profile       = "iq-sandbox"
+# account_id        = "352329340795"
+# github_owner      = "nvgadev"
+# plan_repositories = ["insurequote-*", "terraform-aws-modules"]
+# apply_repository  = "insurequote-platform"
+# apply_environment = "demo"

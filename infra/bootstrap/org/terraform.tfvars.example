@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (git-ignored) and fill in.
+management_account_id = "000000000000" # aws sts get-caller-identity --profile iq-mgmt
+budget_alert_emails   = ["you@example.com"]
+
+# Set to false if you keep the budget you created in the console.
+create_budget = true

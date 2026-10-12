@@ -1,0 +1,57 @@
+name: oidc-smoke-test
+
+# Proves GitHub Actions can reach the sandbox through OIDC with no stored AWS keys.
+# Run it by hand from the Actions tab after the bootstrap is applied.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan-role:
+    name: Plan role (read-only)
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Assume plan role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: gha-smoke-plan-${{ github.run_id }}
+
+      - name: Who am I
+        run: aws sts get-caller-identity
+
+      - name: Can read the state bucket
+        run: aws s3 ls "s3://${{ vars.TF_STATE_BUCKET }}/" --summarize
+
+  apply-role:
+    name: Apply role (needs approval)
+    needs: plan-role
+    runs-on: ubuntu-latest
+    environment: demo
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Assume apply role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_APPLY_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: gha-smoke-apply-${{ github.run_id }}
+
+      - name: Who am I
+        run: aws sts get-caller-identity
+
+      - name: SCP blocks other regions
+        run: |
+          if aws ec2 describe-vpcs --region eu-west-1 >/dev/null 2>&1; then
+            echo "::error::eu-west-1 call succeeded; the region SCP is not in effect"
+            exit 1
+          fi
+          echo "eu-west-1 denied as expected"
