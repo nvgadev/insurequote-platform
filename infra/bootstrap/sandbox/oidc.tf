@@ -4,17 +4,23 @@ locals {
   plan_role_name  = "iq-gha-plan"
   apply_role_name = "iq-gha-apply"
 
+  # GitHub's immutable subjects name the owner and repository with their numeric IDs:
+  # repo:<owner>@<owner_id>/<repo>@<repo_id>:<context>.
+  subject_owner = "${var.github_owner}@${var.github_owner_id}"
+
   # Pull requests and pushes to main may plan. Jobs that use a GitHub Environment
   # get an environment-based subject instead, so they cannot use this role.
+  # Repository IDs are wildcarded so future insurequote-* repos match; names cannot
+  # contain "@" or ":", so the wildcard cannot reach into another part of the subject.
   plan_subjects = flatten([
     for repo in var.plan_repositories : [
-      "repo:${var.github_owner}/${repo}:pull_request",
-      "repo:${var.github_owner}/${repo}:ref:refs/heads/main",
+      "repo:${local.subject_owner}/${repo}@*:pull_request",
+      "repo:${local.subject_owner}/${repo}@*:ref:refs/heads/main",
     ]
   ])
 
   # Only jobs in the apply repository that run in the protected environment may apply.
-  apply_subject = "repo:${var.github_owner}/${var.apply_repository}:environment:${var.apply_environment}"
+  apply_subject = "repo:${local.subject_owner}/${var.apply_repository}@${var.apply_repository_id}:environment:${var.apply_environment}"
 
   plan_role_arn  = "arn:aws:iam::${var.account_id}:role/${local.plan_role_name}"
   apply_role_arn = "arn:aws:iam::${var.account_id}:role/${local.apply_role_name}"
