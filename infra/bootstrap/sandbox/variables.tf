@@ -33,6 +33,20 @@ variable "github_owner" {
   default     = "nvgadev"
 }
 
+variable "github_owner_id" {
+  description = <<-EOT
+    Numeric ID of the GitHub owner (gh api users/<owner> --jq .id). GitHub's immutable
+    OIDC subjects include it, so a renamed or re-created account cannot match.
+  EOT
+  type        = string
+  default     = "192898833"
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_owner_id))
+    error_message = "github_owner_id must be the numeric GitHub user or organization ID."
+  }
+}
+
 variable "plan_repositories" {
   description = <<-EOT
     Repository names (wildcards allowed) whose pull requests and main-branch runs
@@ -46,6 +60,20 @@ variable "apply_repository" {
   description = "The only repository allowed to assume the apply role."
   type        = string
   default     = "insurequote-platform"
+}
+
+variable "apply_repository_id" {
+  description = <<-EOT
+    Numeric ID of the apply repository (gh api repos/<owner>/<repo> --jq .id). The apply
+    role trusts only this ID, so a deleted and re-created repository cannot assume it.
+  EOT
+  type        = string
+  default     = "1416259552"
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.apply_repository_id))
+    error_message = "apply_repository_id must be the numeric GitHub repository ID."
+  }
 }
 
 variable "apply_environment" {
